@@ -1,0 +1,39 @@
+
+name: Build Geode Mod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract mod source
+        run: |
+          mkdir source
+          unzip -q alpha-bot.zip -d source
+          test -f source/CMakeLists.txt
+          test -f source/mod.json
+
+      - name: Build Geode mod
+        id: build
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          path: ./source
+          sdk: 5.11.2
+          target: Android64
+
+      - name: Upload compiled mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: Alpha-Bot-Android64
+          path: ${{ steps.build.outputs.build-output }}/*.geode
+          if-no-files-found: error
+          
